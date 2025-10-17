@@ -1,3 +1,17 @@
-const { register, login } = require("./api/controller");
+const {
+  register,
+  login,
+  verifyCode,
+  forgotPassword,
+  resetPassword,
+  sendNewCode,
+} = require("./api/controller");
 
-module.exports = { register, login };
+module.exports = {
+  register,
+  login,
+  verifyCode,
+  forgotPassword,
+  resetPassword,
+  sendNewCode,
+};

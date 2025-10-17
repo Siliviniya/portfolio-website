@@ -5,6 +5,11 @@ const {
   createJWT,
   verifyJWT,
   createPayload,
+  generateVerificationCode,
+  sendVerificationEmail,
+  generateRefreshToken,
+  createVerificationCode,
+  getUserFromDb,
 } = require("./utils/utils");
 
 module.exports = {
@@ -14,4 +19,9 @@ module.exports = {
   createJWT,
   verifyJWT,
   createPayload,
+  generateVerificationCode,
+  sendVerificationEmail,
+  generateRefreshToken,
+  createVerificationCode,
+  getUserFromDb,
 };
