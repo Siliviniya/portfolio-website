@@ -42,7 +42,7 @@ const createCookie = (res, type, token) => {
     signed: true,
     sameSite: "Strict",
     expiresIn:
-      new Date.now() + type === "refreshToken"
+      Date.now() + type === "refreshToken"
         ? refreshTokenExpiry
         : accessTokenExpiry,
   });

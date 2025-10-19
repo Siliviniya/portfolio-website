@@ -13,9 +13,6 @@ const { dbQuery } = require("../../config/config");
 const { registerData } = require("../data-access/data-access");
 
 const registerLogic = async (username, email, password) => {
-  if (!username || !email || !password) {
-    throw new error.BadRequest("All field must be filled");
-  }
   const alreadyRegistered = await getUserFromDb(email);
   if (alreadyRegistered.rows.length > 0) {
     throw new error.BadRequest("This email is already in use");
@@ -24,14 +21,11 @@ const registerLogic = async (username, email, password) => {
   const registered = await registerData(username, email, hashedPassword);
 
   const code = await createVerificationCode(email);
-  sendVerificationEmail(email, code);
+  await sendVerificationEmail(email, code);
   return registered;
 };
 
 const loginLogic = async (userEmail, userPassword) => {
-  if (!userEmail || !userPassword) {
-    throw new error.BadRequest("All field must be filled");
-  }
   const user = await getUserFromDb(userEmail);
   if (user.rowCount === 0) {
     throw new error.BadRequest("Double check your credentials");
