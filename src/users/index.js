@@ -5,6 +5,7 @@ const {
   forgotPassword,
   resetPassword,
   sendNewCode,
+  sendNewAccessToken,
 } = require("./api/controller");
 
 module.exports = {
@@ -14,4 +15,5 @@ module.exports = {
   forgotPassword,
   resetPassword,
   sendNewCode,
+  sendNewAccessToken,
 };

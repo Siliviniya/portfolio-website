@@ -38,12 +38,12 @@ const loginValidator = () => [
 ];
 
 const resetPasswordValidator = () => [
-  body("repeatPassword")
+  body("newPassword")
     .notEmpty()
     .withMessage("Please enter password")
     .isLength({ min: 8 })
     .withMessage("New password must be above 8 characters"),
-  body("newPassword")
+  body("repeatPassword")
     .notEmpty()
     .withMessage("Please enter your new password again"),
 ];

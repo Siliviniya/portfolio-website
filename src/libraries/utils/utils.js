@@ -18,7 +18,7 @@ const verifyPassword = async (password, hashedPassword) => {
 };
 
 const createJWT = (payload) => {
-  return jwt.sign(payload, process.env.SECRET_CODE);
+  return jwt.sign(payload, process.env.SECRET_CODE, { expiresIn: "5 mins" });
 };
 
 const verifyJWT = (token) => {
@@ -33,18 +33,13 @@ const createPayload = (username, id) => {
   return obj;
 };
 
+// flexible creation of cookie for both refreshtoken and accesstoken
 const createCookie = (res, type, token) => {
-  const accessTokenExpiry = 1000 * 60 * 5;
-  const refreshTokenExpiry = 1000 * 60 * 60 * 24 * 7;
   res.cookie(type, token, {
     httpOnly: true,
     secure: process.env.DEV_MODE === "production",
     signed: true,
     sameSite: "Strict",
-    expiresIn:
-      Date.now() + type === "refreshToken"
-        ? refreshTokenExpiry
-        : accessTokenExpiry,
   });
 };
 

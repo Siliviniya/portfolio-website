@@ -6,7 +6,9 @@ const {
   forgotPasswordLogic,
   resetPasswordLogic,
   sendNewCodeLogic,
+  sendNewAccessTokenLogic,
 } = require("../domain/domain");
+const { createCookie } = require("../../libraries/index");
 
 const register = async (req, res) => {
   const { username, email, password } = req.body;
@@ -19,6 +21,8 @@ const register = async (req, res) => {
 const login = async (req, res) => {
   const { email, password } = req.body;
   const token = await loginLogic(email, password);
+  createCookie(res, "accessToken", token.accessToken);
+  createCookie(res, "refreshToken", token.refreshToken);
   return res
     .status(StatusCodes.OK)
     .json({ msg: "Log in successful!", accessToken: token });
@@ -50,6 +54,12 @@ const sendNewCode = async (req, res) => {
   return res.status(StatusCodes.OK).json({ msg: "Verification code sent!" });
 };
 
+const sendNewAccessToken = async (req, res) => {
+  const { email } = req.body;
+  const token = await sendNewAccessTokenLogic(email);
+  createCookie(res, "accessToken", token);
+};
+
 module.exports = {
   register,
   login,
@@ -57,4 +67,5 @@ module.exports = {
   forgotPassword,
   resetPassword,
   sendNewCode,
+  sendNewAccessToken,
 };

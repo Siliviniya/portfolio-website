@@ -7,6 +7,7 @@ const {
   forgotPassword,
   resetPassword,
   sendNewCode,
+  sendNewAccessToken,
 } = require("../users/index");
 const {
   validateHandler,
@@ -15,16 +16,17 @@ const {
   resetPasswordValidator,
 } = require("../libraries/middleware/validator");
 
-authRouter.post("/register", registerValidator, validateHandler, register);
-authRouter.post("/login", loginValidator, validateHandler, login);
+authRouter.post("/register", registerValidator(), validateHandler, register);
+authRouter.post("/login", loginValidator(), validateHandler, login);
 authRouter.post("/verify", verifyCode);
 authRouter.post("/forgotpassword", forgotPassword);
 authRouter.post(
   "/resetpassword",
-  resetPassword,
+  resetPasswordValidator(),
   validateHandler,
   resetPassword
 );
 authRouter.post("/sendnewcode", sendNewCode);
+authRouter.post("/request_token", sendNewAccessToken);
 
 module.exports = authRouter;
