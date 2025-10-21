@@ -15,12 +15,14 @@ const insert = async (table, column, values) => {
     return `$${index + 1}`;
   });
   const text = `insert into ${table} (${column}) values (${placeholders})`;
-  await dbQuery(text, [...values]);
+  const result = await dbQuery(text, [...values]);
+  return result.rows[0];
 };
 
 const update = async (table, column, filter, values) => {
   const text = `update ${table} set ${column} = $1 where ${filter} = $2`;
-  await dbQuery(text, [...values]);
+  const updatedResult = await dbQuery(text, [...values]);
+  return updatedResult.rows[0];
 };
 
 const deleteData = async (table, column, values) => {

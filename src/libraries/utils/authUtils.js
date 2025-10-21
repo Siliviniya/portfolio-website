@@ -4,6 +4,7 @@ const nodeMailer = require("nodemailer");
 require("dotenv").config();
 const crypto = require("crypto");
 const { dbQuery } = require("../../config/index");
+const { deleteData, insert, select } = require("../query/index");
 const error = require("../errors");
 
 const hashPassword = async (password) => {
@@ -18,7 +19,7 @@ const verifyPassword = async (password, hashedPassword) => {
 };
 
 const createJWT = (payload) => {
-  return jwt.sign(payload, process.env.SECRET_CODE, { expiresIn: "5 mins" });
+  return jwt.sign(payload, process.env.SECRET_CODE, { expiresIn: "5m" });
 };
 
 const verifyJWT = (token) => {
@@ -85,9 +86,31 @@ const createVerificationCode = async (email) => {
   return code;
 };
 
-const getUserFromDb = async (email) => {
-  const user = await dbQuery("select * from users where email = $1", [email]);
-  return user;
+const generateCurrentDate = () => {
+  const currentDate = new Date(Date.now());
+  return currentDate;
+};
+
+const checkRefreshToken = async (email) => {
+  const tokenExists = await select("refreshtoken", "user_email", email);
+  const currentTime = generateCurrentDate();
+  const expiryDate = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30);
+
+  if (currentTime > tokenExists.expires_in) {
+    const refreshToken = generateRefreshToken();
+    const tokenData = await dbQuery(
+      "insert into (refresh_token, expires_in) values ($1, $2) on conflict (user_email) do update set refresh_token = extended.refreshToken, extended.expires_in",
+      [refreshToken, expiryDate]
+    );
+    return tokenData;
+  }
+  return tokenExists;
+};
+
+const createNewAccessToken = (username, id) => {
+  const payload = createPayload(username, id);
+  const newAccessToken = createJWT(payload);
+  return newAccessToken;
 };
 
 module.exports = {
@@ -101,5 +124,7 @@ module.exports = {
   generateRefreshToken,
   generateVerificationCode,
   createVerificationCode,
-  getUserFromDb,
+  checkRefreshToken,
+  createNewAccessToken,
+  generateCurrentDate,
 };

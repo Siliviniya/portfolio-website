@@ -9,9 +9,11 @@ const {
   sendVerificationEmail,
   generateRefreshToken,
   createVerificationCode,
-  getUserFromDb,
   createCookie,
-} = require("./utils/utils");
+  checkRefreshToken,
+  createNewAccessToken,
+  generateCurrentDate,
+} = require("./utils/authUtils");
 
 module.exports = {
   errorHandlerMiddleware,
@@ -24,6 +26,8 @@ module.exports = {
   sendVerificationEmail,
   generateRefreshToken,
   createVerificationCode,
-  getUserFromDb,
   createCookie,
+  checkRefreshToken,
+  createNewAccessToken,
+  generateCurrentDate,
 };

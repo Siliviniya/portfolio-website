@@ -2,12 +2,12 @@ const error = require("../../libraries/errors");
 const {
   hashPassword,
   verifyPassword,
-  createJWT,
-  createPayload,
   generateRefreshToken,
   sendVerificationEmail,
   createVerificationCode,
-  getUserFromDb,
+  checkRefreshToken,
+  createNewAccessToken,
+  generateCurrentDate,
 } = require("../../libraries/index");
 const { dbQuery } = require("../../config/index");
 const { registerData } = require("../data-access/data-access");
@@ -41,8 +41,7 @@ const loginLogic = async (userEmail, userPassword) => {
   if (!isTrue) {
     throw new error.BadRequest("Invalid email or password");
   }
-  const payload = createPayload(username, id);
-  const accessToken = createJWT(payload);
+  const accessToken = createNewAccessToken(username, id);
   const refreshToken = generateRefreshToken();
   const expiryDate = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30);
   await insert(
@@ -55,7 +54,7 @@ const loginLogic = async (userEmail, userPassword) => {
 
 const verifyCodeLogic = async (email, userCode) => {
   const codeData = await select("users", "verification_code", email);
-  const currentDate = new Date(Date.now());
+  const currentDate = generateCurrentDate();
   const { code, expires_in } = codeData;
   if (currentDate > expires_in) {
     await deleteData("verification_code", "user_email", [email]);
@@ -87,13 +86,10 @@ const sendNewCodeLogic = async (email) => {
 };
 
 const sendNewAccessTokenLogic = async (email) => {
-  const token = await select("refreshtoken", "email", email);
-  const currentTime = new Date(Date.now());
-  if (token && currentTime < token.expires_in) {
-    const user = await select("users", "email", email);
-    const { username, id } = user;
-    const payload = createPayload(username, id);
-    const newAccessToken = createJWT(payload);
+  const checkedToken = await checkRefreshToken(email);
+  if (checkedToken) {
+    const { username, id } = checkedToken;
+    const newAccessToken = createNewAccessToken(username, id);
     return newAccessToken;
   }
 };

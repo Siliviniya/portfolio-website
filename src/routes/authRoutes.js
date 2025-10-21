@@ -14,7 +14,7 @@ const {
   registerValidator,
   loginValidator,
   resetPasswordValidator,
-} = require("../libraries/middleware/validator");
+} = require("../libraries/middleware/authValidator");
 
 authRouter.post("/register", registerValidator(), validateHandler, register);
 authRouter.post("/login", loginValidator(), validateHandler, login);
