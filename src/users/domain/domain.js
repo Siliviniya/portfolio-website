@@ -9,14 +9,22 @@ const {
   createVerificationCode,
   getUserFromDb,
 } = require("../../libraries/index");
-const { dbQuery } = require("../../config/config");
+const { dbQuery } = require("../../config/index");
 const { registerData } = require("../data-access/data-access");
-const { select } = require("../../libraries/query/index");
+const {
+  select,
+  insert,
+  update,
+  deleteData,
+} = require("../../libraries/query/index");
 
 const registerLogic = async (username, email, password) => {
-  const alreadyRegistered = await select("users", "email", email);
-  if (alreadyRegistered) {
-    throw new error.BadRequest("This email is already in use");
+  const alreadyRegistered = await dbQuery(
+    "select * from users where email = $1",
+    [email]
+  );
+  if (alreadyRegistered.rows.length > 0) {
+    throw new error.BadRequest("Invalid email or password");
   }
   const hashedPassword = await hashPassword(password);
   const registered = await registerData(username, email, hashedPassword);
@@ -31,15 +39,17 @@ const loginLogic = async (userEmail, userPassword) => {
   const { password, id, username } = user;
   const isTrue = await verifyPassword(userPassword, password);
   if (!isTrue) {
-    throw new error.BadRequest("Double check your credentials");
+    throw new error.BadRequest("Invalid email or password");
   }
   const payload = createPayload(username, id);
   const accessToken = createJWT(payload);
   const refreshToken = generateRefreshToken();
-  await dbQuery("insert into refreshtoken (token, user_id) values ($1, $2)", [
-    refreshToken,
-    id,
-  ]);
+  const expiryDate = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30);
+  await insert(
+    "refreshtoken",
+    ["refresh_token", "user_email", "expires_in"],
+    [refreshToken, userEmail, expiryDate]
+  );
   return { accessToken, refreshToken };
 };
 
@@ -48,21 +58,15 @@ const verifyCodeLogic = async (email, userCode) => {
   const currentDate = new Date(Date.now());
   const { code, expires_in } = codeData;
   if (currentDate > expires_in) {
-    await dbQuery("delete from verification_code where user_email = $1", [
-      email,
-    ]);
-    throw new error.BadRequest("The code has expired generate a new code");
+    await deleteData("verification_code", "user_email", [email]);
+    throw new error.BadRequest("Verification failed please try again");
   }
   if (userCode !== code) {
-    throw new error.BadRequest("Double check your code again");
+    throw new error.BadRequest("Invalid code please try again");
   }
 };
 
 const forgotPasswordLogic = async (email) => {
-  const user = await getUserFromDb(email);
-  if (user.rows.length === 0) {
-    throw new error.NotFound("Credentials not found please try again");
-  }
   const code = await createVerificationCode(email);
   await sendVerificationEmail(email, code);
 };
@@ -70,15 +74,11 @@ const forgotPasswordLogic = async (email) => {
 const resetPasswordLogic = async (email, newPassword, repeatPassword) => {
   if (repeatPassword !== newPassword) {
     throw new error.BadRequest(
-      "Typed credentials does not match please try again"
+      "Password reset failed. Please check your input"
     );
   }
   const hashedPassword = await hashPassword(repeatPassword);
-  const appliedNewPassword = await dbQuery(
-    "update users set password = $1 where email = $2",
-    [hashedPassword, email]
-  );
-  console.log(appliedNewPassword);
+  await update("users", "password", "email", [hashedPassword, email]);
 };
 
 const sendNewCodeLogic = async (email) => {
@@ -88,7 +88,8 @@ const sendNewCodeLogic = async (email) => {
 
 const sendNewAccessTokenLogic = async (email) => {
   const token = await select("refreshtoken", "email", email);
-  if (token) {
+  const currentTime = new Date(Date.now());
+  if (token && currentTime < token.expires_in) {
     const user = await select("users", "email", email);
     const { username, id } = user;
     const payload = createPayload(username, id);

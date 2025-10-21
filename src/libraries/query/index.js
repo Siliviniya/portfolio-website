@@ -1,3 +1,3 @@
-const { select } = require("./sqlQuery");
+const { select, insert, update, deleteData } = require("./authQuery");
 
-module.exports = { select };
+module.exports = { select, insert, update, deleteData };

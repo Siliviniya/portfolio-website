@@ -10,6 +10,7 @@ const {
   generateRefreshToken,
   createVerificationCode,
   getUserFromDb,
+  createCookie,
 } = require("./utils/utils");
 
 module.exports = {
@@ -24,4 +25,5 @@ module.exports = {
   generateRefreshToken,
   createVerificationCode,
   getUserFromDb,
+  createCookie,
 };

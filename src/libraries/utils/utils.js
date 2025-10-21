@@ -77,7 +77,7 @@ const sendVerificationEmail = async (email, code) => {
 
 const createVerificationCode = async (email) => {
   const code = generateVerificationCode();
-  const codeExpiry = new Date(Date.now() + 1000 * 30);
+  const codeExpiry = new Date(Date.now() + 1000 * 60 * 3);
   await dbQuery(
     "insert into verification_code (code, expires_in, user_email) values ($1, $2, $3)",
     [code, codeExpiry, email]
