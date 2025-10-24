@@ -8,7 +8,8 @@ const authenticate = (req, res, next) => {
   }
   const token = authHeader.split(" ")[1];
   const payload = verifyJWT(token);
-  req.user.userID = payload.id;
+  console.log(payload);
+  req.user = payload.id;
   next();
 };
 

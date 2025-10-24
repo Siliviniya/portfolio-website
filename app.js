@@ -10,7 +10,9 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 
 const authRouter = require("./src/routes/authRoutes");
+const postRouter = require("./src/routes/postRoutes");
 const { errorHandlerMiddleware } = require("./src/libraries/index");
+const authenticate = require("./src/libraries/middleware/authenticate");
 
 app.set("trust proxy", 1);
 app.use(
@@ -29,7 +31,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser(process.env.SECRET_CODE));
 
 app.use("/api/auth", authRouter);
-
+app.use("/api/post", authenticate, postRouter);
 app.use(errorHandlerMiddleware);
 
 const port = process.env.PORT || 5000;

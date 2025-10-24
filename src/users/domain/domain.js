@@ -37,6 +37,7 @@ const registerLogic = async (username, email, password) => {
 const loginLogic = async (userEmail, userPassword) => {
   const user = await select("users", "email", userEmail);
   const { password, id, username } = user;
+  console.log(id);
   const isTrue = await verifyPassword(userPassword, password);
   if (!isTrue) {
     throw new error.BadRequest("Invalid email or password");

@@ -18,3 +18,10 @@ create table verification_code (
   user_id uuid references users(id) on delete cascade
   expires_in timestamp not null
 )
+
+create table post (
+  id uuid primary key default gen_random_uuid(),
+  user_post varchar(1000) not null,
+  post_time timestamp
+  user_id uuid references users(id) on delete cascade
+)

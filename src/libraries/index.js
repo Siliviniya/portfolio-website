@@ -14,6 +14,8 @@ const {
   createNewAccessToken,
   generateCurrentDate,
 } = require("./utils/authUtils");
+const asyncWrapper = require("./utils/async");
+const { uploadFiles } = require("./utils/postUtil");
 
 module.exports = {
   errorHandlerMiddleware,
@@ -30,4 +32,6 @@ module.exports = {
   checkRefreshToken,
   createNewAccessToken,
   generateCurrentDate,
+  asyncWrapper,
+  uploadFiles,
 };

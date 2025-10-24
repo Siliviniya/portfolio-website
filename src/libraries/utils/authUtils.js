@@ -102,7 +102,7 @@ const checkRefreshToken = async (email) => {
       "insert into (refresh_token, expires_in) values ($1, $2) on conflict (user_email) do update set refresh_token = extended.refreshToken, extended.expires_in",
       [refreshToken, expiryDate]
     );
-    return tokenData;
+    return tokenData.rows[0];
   }
   return tokenExists;
 };
